@@ -9,19 +9,46 @@ const port = 3000;
 
 app.use(bodyParser.json());
 
-app.get('/test', (req, res)=>{
-  res.json('Hello api is working');
-});
+
+
 
 app.listen(port, ()=>{
   console.log(`Server is running on :${port}`);
 })
 
 
-// mongoose.connect('mongodb+srv://naseefvaliyakath:Q6sMkCWaGIQ3VQ75@cluster0.kw5q1wg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-// const db = mongoose.connection;
-// db.on('error', (error) => console.error(error));
-// db.once('open', () => console.log('Connected to Database'));
+mongoose.connect('mongodb+srv://nadiya69:Nvhk1GfWYrJeozgu@drivesmart.r0uoyw3.mongodb.net/?retryWrites=true&w=majority&appName=DriveSmart');
+const db = mongoose.connection;
+db.on('error', (error) => console.error(error));
+db.once('open', () => console.log('Connected to Database'));
+
+const { Schema, model } = mongoose;
+const userSchema = new Schema({
+  name: String,
+  age: Number,
+  email: String
+});
+const User = model('User', userSchema);
+
+
+app.post('/', (req, res)=>{
+  const {name, age, email} = req.body
+  const newUser = new User({name: name, age: age, email: email});
+  newUser.save();
+  res.json('Api is working')
+});
+
+app.get('/', async (req, res)=>{
+  const users = await User.find();
+  res.json(users)
+});
+
+app.put('/', async (req, res)=>{
+  await User.findByIdAndUpdate(id, { $set: { name:"medhani"}}, {{{}}})
+  res.json(users)
+});
+
+
 
 
 // app.delete('/:id', async (req, res) => {
@@ -39,10 +66,3 @@ app.listen(port, ()=>{
 
 
 
-// const { Schema, model } = mongoose;
-// const userSchema = new Schema({
-//   name: String,
-//   age: Number,
-//   email: String
-// });
-// const User = model('User', userSchema);
