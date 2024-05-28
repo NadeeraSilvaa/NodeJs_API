@@ -1,68 +1,54 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const mongoose = require('mongoose');
+const asyncHandler = require('express-async-handler');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const app = express();
-const port = 3000;
-
-
-
+//?Middle wair
+app.use(cors({ origin: '*' }))
 app.use(bodyParser.json());
+//? setting static folder path
+app.use('/image/products', express.static('public/products'));
+app.use('/image/category', express.static('public/category'));
+app.use('/image/poster', express.static('public/posters'));
 
-
-
-
-app.listen(port, ()=>{
-  console.log(`Server is running on :${port}`);
-})
-
-
-mongoose.connect('mongodb+srv://nadiya69:Nvhk1GfWYrJeozgu@drivesmart.r0uoyw3.mongodb.net/?retryWrites=true&w=majority&appName=DriveSmart');
+const URL = process.env.MONGO_URL;
+mongoose.connect(URL);
 const db = mongoose.connection;
 db.on('error', (error) => console.error(error));
 db.once('open', () => console.log('Connected to Database'));
 
-const { Schema, model } = mongoose;
-const userSchema = new Schema({
-  name: String,
-  age: Number,
-  email: String
+// Routes
+app.use('/categories', require('./routes/category'));
+app.use('/subCategories', require('./routes/subCategory'));
+app.use('/brands', require('./routes/brand'));
+app.use('/variantTypes', require('./routes/variantType'));
+app.use('/variants', require('./routes/variant'));
+app.use('/products', require('./routes/product'));
+app.use('/couponCodes', require('./routes/couponCode'));
+app.use('/posters', require('./routes/poster'));
+app.use('/users', require('./routes/user'));
+app.use('/orders', require('./routes/order'));
+app.use('/payment', require('./routes/payment'));
+app.use('/notification', require('./routes/notification'));
+
+
+// Example route using asyncHandler directly in app.js
+app.get('/', asyncHandler(async (req, res) => {
+    res.json({ success: true, message: 'API working successfully', data: null });
+}));
+
+// Global error handler
+app.use((error, req, res, next) => {
+    res.status(500).json({ success: false, message: error.message, data: null });
 });
-const User = model('User', userSchema);
 
 
-app.post('/', (req, res)=>{
-  const {name, age, email} = req.body
-  const newUser = new User({name: name, age: age, email: email});
-  newUser.save();
-  res.json('Api is working')
+app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
 });
-
-app.get('/', async (req, res)=>{
-  const users = await User.find();
-  res.json(users)
-});
-
-app.put('/', async (req, res)=>{
-  await User.findByIdAndUpdate(id, { $set: { name:"medhani"}}, {{{}}})
-  res.json(users)
-});
-
-
-
-
-// app.delete('/:id', async (req, res) => {
-//   const id = req.params.id;
-//  await User.findByIdAndDelete(id);
-//   res.json('Delete successfully');
-// });
-
-// //TODO:  this
-
-
-// app.listen(port, () => {
-//   console.log(`Server is running on :${port}`);
-// });
-
 
 
